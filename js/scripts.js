@@ -6,22 +6,15 @@ let divideFunction = (a,b) => { return a / b; };
 let operationEnum = {PLUS: 1, MINUS: 2, MULTIPLY: 3, DIVIDE: 4};
 let operationSymbolEnum = {PLUS: '+', MINUS: '-', MULTIPLY: '\u00d7', DIVIDE: '\u00f7'};
 
-class CalcElement extends HTMLElement{
-    constructor(label,size){
+class CalcElement extends HTMLButtonElement{
+    constructor(label){
         super();
-        this.size = size;
-        super.innerText = label;
-        super.classList.add(`col-md-${size}`);
+        this.addEventListener("click",this.onClick())
+        super.classList.add(`btn`);
+        this.innerText = label;
     }
-    get label(){
-        return super.innerText;
-    }
-    set label(label){
-        super.innerText = label;
-    }
-    changeSize(newSize){
-        super.classList.remove(`col-md-${this.size}`);
-        super.classList.add(`col-md-${newSize}`);
+    onClick(){
+
     }
 } 
 class Calc{
@@ -30,7 +23,7 @@ class Calc{
         this.numbers = [];
         this.operation;
     }
-    inputNum(number){
+    inputNum(number){ //do poprawy->wczytywanie liczb większych niż 9
         if (this.numbers.length >= 2){
             this.numbers.pop();
             this.numbers.unshift(number);
@@ -67,14 +60,14 @@ class Calc{
     }
 }
 class NumButton extends CalcElement{
-    constructor(number, Calc){
+    constructor(number, OutputField){
         super();
         super.innerText = number;
-        this.Calc = Calc;
-        this.addEventListener("click",onClick());
+        this.OutputField = OutputField;
+        super.classList.add(`btn-primary`);
     }
     onClick(){
-        Calc.inputNum(Number(number));
+        //write to OutputField.value
     }
 }
 
@@ -83,32 +76,68 @@ class OperatorButton extends CalcElement{
         super();
         super.innerText = operationSymbolEnum;
         this.Calc = Calc;
-        this.addEventListener("click",onClick());
+        super.classList.add(`btn`);
+        super.classList.add(`btn-secondary`);
     }
     onClick(){
-        Calc.inputOp(operationSymbolEnum);
+        // this.Calc.inputOp(this.operationSymbolEnum); ma działać !!!!
     }
 }
 
-class OutputField extends CalcElement{
-    constructor(){
+class OutputField extends HTMLInputElement{
+    constructor(startLabel){
         super();
+        super.value = startLabel;
+        super.classList.add(`form-control`);
     }
     setOutput(number){
-        this.innerText = String(number);
+        super.value += String(number);
     }
 }
-
+function createRows(howMany){
+    let rows = document.createDocumentFragment();
+    for (let i = 0; i < howMany; i++){
+        let element = document.createElement(`div`);
+        element.className = `row`;
+        rows.appendChild(element);
+    }
+    return rows;
+}
+function createColumns(howMany){
+    let size = 12/Number(howMany);
+    let columns = document.createDocumentFragment();
+    for (let i = 0; i < howMany; i++){
+        let element = document.createElement(`div`);
+        element.className = `col-sm-${size}`;
+        columns.appendChild(element);
+    }
+    return columns;
+}
+function createGrid(){
+    let doc = document.querySelector(`.container`);
+    doc.appendChild( createRows(6) );
+    let rows = document.querySelectorAll(`.row`);
+    columnsFirstRow = createColumns(1);
+    rows[0].appendChild(columnsFirstRow);
+    columnsSecondRow = createColumns(3);
+    rows[1].appendChild(columnsSecondRow);
+    for (let i = 2; i < rows.length; i++){
+        columnsRowI = createColumns(4);
+        rows[i].appendChild(columnsRowI);
+    }
+}
 function Init(){
-    customElements.define('calc-element',CalcElement);
-    customElements.define('num-button',NumButton);
-    customElements.define('operator-button', OperatorButton);
-    customElements.define('output-field',OutputField);
-    let Output = new OutputField();
-    let Kalkulator = new Calc(Output);
-    Kalkulator.inputNum(10);
-    Kalkulator.inputNum(5);
-    Kalkulator.inputOp(operationEnum.DIVIDE);
-    Kalkulator.calculate();
-    console.log(Output.innerText);
+    customElements.define('calc-element',CalcElement,{extends:'button'});
+    customElements.define('num-button',NumButton,{extends:'button'});
+    customElements.define('operator-button', OperatorButton,{extends:'button'});
+    customElements.define('output-field',OutputField, {extends:'input'});
+    let output = new OutputField(99999);
+    createGrid();
+    doc = document.querySelector(`.col-sm-12`);
+    doc.appendChild(output);
+    operators = document.querySelectorAll(`.col-sm-4`);
+    for (let i =0; i < operators.length; i++){
+        operators[i].appendChild(new NumButton(i,output));
+    }
+
 }
