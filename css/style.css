@@ -1,6 +1,6 @@
 .container{
-    width: 40%;
-    padding: 100px;
+    width: 20%;
+    padding: 20px;
 }
 .btn{
     width: 100%;
@@ -9,5 +9,8 @@
 }
 [class*=col]{
     padding: 2px;
+}
+.form-control{
+    text-align: right;
 }
 
