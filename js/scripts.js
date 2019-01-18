@@ -2,8 +2,6 @@ let sumFunction = (a,b) => { return a + b; };
 let substractFunction = (a,b) => { return a - b; };
 let multipleFunction = (a,b) => { return a * b; };
 let divideFunction = (a,b) => { return a / b; };
-
-let operationEnum = {PLUS: 1, MINUS: 2, MULTIPLY: 3, DIVIDE: 4};
 let operationSymbolEnum = {PLUS: '+', MINUS: '-', MULTIPLY: '\u00d7', DIVIDE: '\u00f7',CALC: '=',COMA : ',',P_M: '\u00b1' , C: 'c', BACKSPACE: '\u232B'}; //P_m +/- unicode symbol
 
 class CalcElement extends HTMLButtonElement{
@@ -68,23 +66,22 @@ class NumButton extends CalcElement{
 }
 
 class OperatorButton extends CalcElement{
-    constructor(operationSymbolEnum, Calc){
+    constructor(operationSymbolEnum, Calc,operation){
         super();
         super.innerText = operationSymbolEnum;
         this.Calc = Calc;
-        this.operationSymbolEnum = operationSymbolEnum;
         super.classList.add(`btn`);
         super.classList.add(`btn-secondary`);
+        this.operation = operation;
         super.addEventListener("click",() => {
-            this.Calc.inputOp(this.operationSymbolEnum);
+            this.Calc.inputOp(this.operation);
         });
     }
 }
 
 class OutputField extends HTMLInputElement{
-    constructor(startLabel){
+    constructor(){
         super();
-        super.value = startLabel;
         super.classList.add(`form-control`);
     }
     setOutput(number){
@@ -127,23 +124,22 @@ function addFirstOperatorRow(Calc){
     operators = document.querySelectorAll(`.col-sm-4`);
     operators[0].appendChild(new OperatorButton(operationSymbolEnum.C,Calc));
     operators[1].appendChild(new OperatorButton(operationSymbolEnum.BACKSPACE, Calc));
-    operators[2].appendChild(new OperatorButton(operationSymbolEnum.PLUS,Calc));
+    operators[2].appendChild(new OperatorButton(operationSymbolEnum.PLUS,Calc,sumFunction));
 }
 function addButtonsToGrid(Calc,OutputField){
     nums = document.querySelectorAll(`.col-sm-3`);
-    console.log(nums);
     numbers = [7,8,9,4,5,6,1,2,3,0];
     let j=0; //additional counter for going through numbers[]
     for (let i = 0; i < nums.length; i++){
         switch (i){
             case 3:
-                nums[i].appendChild(new OperatorButton(operationSymbolEnum.MINUS,Calc));
+                nums[i].appendChild(new OperatorButton(operationSymbolEnum.MINUS,Calc,substractFunction));
                 break;
             case 7:
-                nums[i].appendChild(new OperatorButton(operationSymbolEnum.DIVIDE,Calc));
+                nums[i].appendChild(new OperatorButton(operationSymbolEnum.DIVIDE,Calc,divideFunction));
                 break;
             case 11:
-                nums[i].appendChild(new OperatorButton(operationSymbolEnum.MULTIPLY, Calc));
+                nums[i].appendChild(new OperatorButton(operationSymbolEnum.MULTIPLY, Calc,multipleFunction));
                 break;
             case 15:
                 nums[i].appendChild(new OperatorButton(operationSymbolEnum.CALC, Calc));
@@ -173,9 +169,8 @@ function Init(){
     customElements.define('num-button',NumButton,{extends:'button'});
     customElements.define('operator-button', OperatorButton,{extends:'button'});
     customElements.define('output-field',OutputField, {extends:'input'});
-    let output = new OutputField(0);
+    let output = new OutputField();
     let calc = new Calc(output);
     createGrid();
     fillGrid(calc,output);
-
 }
