@@ -9,12 +9,8 @@ let operationSymbolEnum = {PLUS: '+', MINUS: '-', MULTIPLY: '\u00d7', DIVIDE: '\
 class CalcElement extends HTMLButtonElement{
     constructor(label){
         super();
-        this.addEventListener("click",this.onClick())
         super.classList.add(`btn`);
         this.innerText = label;
-    }
-    onClick(){
-
     }
 } 
 class Calc{
@@ -65,9 +61,9 @@ class NumButton extends CalcElement{
         super.innerText = number;
         this.OutputField = OutputField;
         super.classList.add(`btn-primary`);
-    }
-    onClick(){
-        //write to OutputField.value
+        super.addEventListener("click",() => {
+            this.OutputField.setOutput(super.innerText);
+        });
     }
 }
 
@@ -78,6 +74,7 @@ class OperatorButton extends CalcElement{
         this.Calc = Calc;
         super.classList.add(`btn`);
         super.classList.add(`btn-secondary`);
+        super.addEventListener("click",onClick());
     }
     onClick(){
         // this.Calc.inputOp(this.operationSymbolEnum); ma działać !!!!
@@ -131,7 +128,7 @@ function Init(){
     customElements.define('num-button',NumButton,{extends:'button'});
     customElements.define('operator-button', OperatorButton,{extends:'button'});
     customElements.define('output-field',OutputField, {extends:'input'});
-    let output = new OutputField(99999);
+    let output = new OutputField(0);
     createGrid();
     doc = document.querySelector(`.col-sm-12`);
     doc.appendChild(output);
