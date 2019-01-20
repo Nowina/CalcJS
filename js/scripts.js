@@ -16,7 +16,7 @@ class AbstractInjectedFuncionality{
         this.function = func;
         this.calc = Calc;
     }
-    static invoke(){}
+    invoke(){}
 }
 class TwoArgumentsOperation extends AbstractInjectedFuncionality{
     constructor(operationSymbolEnum, functionIndicator, Calc){
@@ -25,7 +25,7 @@ class TwoArgumentsOperation extends AbstractInjectedFuncionality{
         this.operationSymbolEnum = operationSymbolEnum;
         super.calc = Calc;
     }
-    static invoke(){
+    invoke(){
         if (super.calc.isNumberSaved){
             super.calc.doSavedOperation();
         }
@@ -41,7 +41,7 @@ class Functionality extends AbstractInjectedFuncionality{
         super.calc = Calc;
         this.output = OutputField;
     }
-    static invoke(){
+    invoke(){
         switch(super.function){
             case operationSymbolEnum.COMA:
                 this.output.addComa();
