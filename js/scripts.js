@@ -11,46 +11,85 @@ class CalcElement extends HTMLButtonElement{
         this.innerText = label;
     }
 } 
+class AbstractInjectedFuncionality{
+    constructor(func, Calc){
+        this.function = func;
+        this.calc = Calc;
+    }
+    static invoke(){}
+}
+class TwoArgumentsOperation extends AbstractInjectedFuncionality{
+    constructor(operationSymbolEnum, functionIndicator, Calc){
+        super();
+        super.function = functionIndicator;
+        this.operationSymbolEnum = operationSymbolEnum;
+        super.calc = Calc;
+    }
+    static invoke(){
+        if (super.calc.isNumberSaved){
+            super.calc.doSavedOperation();
+        }
+        else{
+            super.calc.saveNumberAndClearOutput();
+        }
+        super.calc.setOperation(super.function);
+    }
+}
+class Functionality extends AbstractInjectedFuncionality{
+    constructor(operationSymbolEnum,Calc, OutputField){
+        super.function = operationSymbolEnum;
+        super.calc = Calc;
+        this.output = OutputField;
+    }
+    static invoke(){
+        switch(super.function){
+            case operationSymbolEnum.COMA:
+                this.output.addComa();
+                break;
+            case operationSymbolEnum.CALC:
+                if (super.calc.isNumberSaved){
+                    super.calc.doSavedOperation();
+                }
+                break;
+            case operationSymbolEnum.P_M:
+                this.output.changeSign();
+                break;
+            case operationSymbolEnum.BACKSPACE:
+                this.output.backspace();
+                break;
+            case operationSymbolEnum.C:
+                this.output.clearOutput();
+                break;
+        }
+    }
+}
 class Calc{
     constructor(OutputField){
         this.OutputField = OutputField;
-        this.numbers = [];
+        this.numberA;
+        this.numberB;
         this.operation;
+        this.numberSaved = false;
     }
-    inputNum(number){ //do poprawy->wczytywanie liczb większych niż 9
-        if (this.numbers.length >= 2){
-            this.numbers.pop();
-            this.numbers.unshift(number);
-        }
-        else{
-            this.numbers.unshift(number);
-        }
+    loadActualNumber(){
+        this.numberA = this.OutputField.getOutput();
     }
-    inputOp(operationEnum){
-        this.operationEnum = operationEnum;
+    saveNumberAndClearOutput(){
+        this.numberB = this.numberA;
+        this.numberSaved = true;
+        this.OutputField.clearOutput();
     }
-    calculate(){
-        let result = 0;
-        if (this.operationEnum == operationEnum.DIVIDE && this.numbers[0] == 0){
-            alert("You shall not divide by zero!!!");
-        }
-        else{
-            switch (this.operationEnum){
-                case operationEnum.PLUS:
-                    result = sumFunction(this.numbers[1], this.numbers[0]);
-                    break;
-                case operationEnum.MINUS:
-                    result = substractFunction(this.numbers[1], this.numbers[0]);
-                    break;
-                case operationEnum.MULTIPLY:
-                    result = multipleFunction(this.numbers[1], this.numbers[0]);
-                    break;
-                case operationEnum.DIVIDE:
-                    result = divideFunction(this.numbers[1], this.numbers[0]);
-                    break;
-            }
-            this.OutputField.setOutput(result);
-        }
+    setOperation(operation){
+        this.operation = operation;
+    }
+    doSavedOperation(){
+        this.clearOutput();
+        this.numberA = this.operation(this.numberB, this.numberA);
+        this.numberSaved = false;
+        this.setOutput(this.numberA);
+    }
+    isNumberSaved(){
+        return this.numberSaved;
     }
 }
 class NumButton extends CalcElement{
@@ -66,15 +105,14 @@ class NumButton extends CalcElement{
 }
 
 class OperatorButton extends CalcElement{
-    constructor(operationSymbolEnum, Calc,operation){
+    constructor(operationSymbolEnum,Functionality){
         super();
         super.innerText = operationSymbolEnum;
-        this.Calc = Calc;
+        this.function = Functionality;
         super.classList.add(`btn`);
         super.classList.add(`btn-secondary`);
-        this.operation = operation;
         super.addEventListener("click",() => {
-            this.Calc.inputOp(this.operation);
+            this.function.invoke();
         });
     }
 }
@@ -86,6 +124,21 @@ class OutputField extends HTMLInputElement{
     }
     setOutput(number){
         super.value += String(number);
+    }
+    getOutput(){
+        return super.value;
+    }
+    clearOutput(){
+        super.value = null;
+    }
+    addComa(){
+        super.value += ',';
+    }
+    changeSign(){
+        super.value *= -1;
+    }
+    backspace(){
+        super.value = String(super.value).substring(0, String(super.value).length - 1);
     }
 }
 function createRows(howMany){
