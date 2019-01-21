@@ -11,8 +11,7 @@ class CalcElement extends HTMLButtonElement{
     }
 } 
 class AbstractInjectedFuncionality{
-    constructor(func, Calc){
-        this.function = func;
+    constructor(Calc){
         this.calc = Calc;
     }
     invoke(){}
@@ -20,35 +19,38 @@ class AbstractInjectedFuncionality{
 class TwoArgumentsOperation extends AbstractInjectedFuncionality{
     constructor(operationSymbolEnum, functionIndicator, Calc){
         super();
-        super.function = functionIndicator;
+        this.function = functionIndicator;
         this.operationSymbolEnum = operationSymbolEnum;
-        super.calc = Calc;
+        this.calc = Calc;
     }
     invoke(){
-        if (super.calc.isNumberSaved){
-            super.calc.doSavedOperation();
+        if (this.calc.isNumberSaved()){
+            this.calc.doSavedOperation();
         }
         else{
-            super.calc.saveNumberAndClearOutput();
+            this.calc.saveNumberAndClearOutput();
         }
-        super.calc.setOperation(super.function);
+        this.calc.setOperation(this.function);
+    }
+    getEnum(){
+        return this.operationSymbolEnum;
     }
 }
 class Functionality extends AbstractInjectedFuncionality{
     constructor(operationSymbolEnum,Calc, OutputField){
         super();
-        super.function = operationSymbolEnum;
-        super.calc = Calc;
+        this.calc = Calc;
+        this.function = operationSymbolEnum;
         this.output = OutputField;
     }
     invoke(){
-        switch(super.function){
+        switch(this.function){
             case operationSymbolEnum.COMA:
                 this.output.addComa();
                 break;
             case operationSymbolEnum.CALC:
-                if (super.calc.isNumberSaved){
-                    super.calc.doSavedOperation();
+                if (this.calc.isNumberSaved){
+                    this.calc.doSavedOperation();
                 }
                 break;
             case operationSymbolEnum.P_M:
@@ -57,13 +59,13 @@ class Functionality extends AbstractInjectedFuncionality{
             case operationSymbolEnum.BACKSPACE:
                 this.output.backspace();
                 break;
-            case 'C':
+            case operationSymbolEnum.C:
                 this.output.clearOutput();
                 break;
         }
     }
     getEnum(){
-        return super.function;
+        return this.function;
     }
 }
 class Calc{
@@ -75,7 +77,7 @@ class Calc{
         this.numberSaved = false;
     }
     loadActualNumber(){
-        this.numberA = this.OutputField.getOutput();
+        this.numberA = Number(this.OutputField.getOutput());
     }
     saveNumberAndClearOutput(){
         this.numberB = this.numberA;
@@ -86,10 +88,10 @@ class Calc{
         this.operation = operation;
     }
     doSavedOperation(){
-        this.clearOutput();
+        this.OutputField.clearOutput();
         this.numberA = this.operation(this.numberB, this.numberA);
         this.numberSaved = false;
-        this.setOutput(this.numberA);
+        this.OutputField.setOutput(this.numberA);
     }
     isNumberSaved(){
         return this.numberSaved;
@@ -111,7 +113,7 @@ class OperatorButton extends CalcElement{
     constructor(Functionality){
         super();
         this.function = Functionality;
-        super.innerText = Functionality.getEnum();
+        super.innerText = this.function.getEnum();
         super.classList.add(`btn`);
         super.classList.add(`btn-secondary`);
         super.addEventListener("click",() => {
@@ -178,12 +180,9 @@ function createGrid(){
 }
 function addFirstOperatorRow(Calc,OutputField){
     operators = document.querySelectorAll(`.col-sm-4`);
-    let CFunctionality = new Functionality(operationSymbolEnum.C,Calc,OutputField);
-    let BackspaceFunctionality = new Functionality(operationSymbolEnum.BACKSPACE,Calc, OutputField);
-    console.log(CFunctionality);
-    operators[0].appendChild(new OperatorButton(CFunctionality));
-    operators[1].appendChild(new OperatorButton(BackspaceFunctionality));
-    // operators[2].appendChild(new OperatorButton(new Functionality(operationSymbolEnum.PLUS,Calc,OutputField)));
+    operators[0].appendChild(new OperatorButton(new Functionality(operationSymbolEnum.C,Calc,OutputField)));
+    operators[1].appendChild(new OperatorButton(new Functionality(operationSymbolEnum.BACKSPACE,Calc, OutputField)));
+    operators[2].appendChild(new OperatorButton(new TwoArgumentsOperation(operationSymbolEnum.PLUS,sumFunction,Calc)));
 }
 function addButtonsToGrid(Calc,OutputField){
     nums = document.querySelectorAll(`.col-sm-3`);
@@ -192,22 +191,22 @@ function addButtonsToGrid(Calc,OutputField){
     for (let i = 0; i < nums.length; i++){
         switch (i){
             case 3:
-                nums[i].appendChild(new OperatorButton(operationSymbolEnum.MINUS,Calc,substractFunction));
+                nums[i].appendChild(new OperatorButton( new TwoArgumentsOperation(operationSymbolEnum.MINUS,substractFunction,Calc)));
                 break;
             case 7:
-                nums[i].appendChild(new OperatorButton(operationSymbolEnum.DIVIDE,Calc,divideFunction));
+                nums[i].appendChild(new OperatorButton(new TwoArgumentsOperation(operationSymbolEnum.DIVIDE,divideFunction,Calc)));
                 break;
             case 11:
-                nums[i].appendChild(new OperatorButton(operationSymbolEnum.MULTIPLY, Calc,multipleFunction));
-                break;
-            case 15:
-                nums[i].appendChild(new OperatorButton(operationSymbolEnum.CALC, Calc));
+                nums[i].appendChild(new OperatorButton(new TwoArgumentsOperation(operationSymbolEnum.MULTIPLY,multipleFunction,Calc)));
                 break;
             case 12:
-                nums[i].appendChild(new OperatorButton(operationSymbolEnum.P_M, Calc));
+                nums[i].appendChild(new OperatorButton(new Functionality(operationSymbolEnum.P_M,Calc,OutputField)));
                 break;
             case 14:
-                nums[i].appendChild(new OperatorButton(operationSymbolEnum.COMA, Calc));
+                nums[i].appendChild(new OperatorButton(new Functionality(operationSymbolEnum.COMA,Calc, OutputField)));
+                break;
+            case 15:
+                nums[i].appendChild(new OperatorButton(new Functionality(operationSymbolEnum.CALC,Calc,OutputField)));
                 break;
             default:
                 nums[i].appendChild(new NumButton(numbers[j],OutputField));
