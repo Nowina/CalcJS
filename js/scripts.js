@@ -1,8 +1,8 @@
-let sumFunction = (a,b) => { return a + b; };
-let substractFunction = (a,b) => { return a - b; };
-let multipleFunction = (a,b) => { return a * b; };
-let divideFunction = (a,b) => { return a / b; };
-let operationSymbolEnum = {PLUS: '+', MINUS: '-', MULTIPLY: '\u00d7', DIVIDE: '\u00f7',CALC: '=',COMA : ',',P_M: '\u00b1' , C: 'C', BACKSPACE: '\u232B'}; //P_m +/- unicode symbol
+let sumFunction = (a,b) => { return (a + b).toFixed(3); };
+let substractFunction = (a,b) => { return (a - b).toFixed(3); };
+let multipleFunction = (a,b) => { return (a * b).toFixed(3); };
+let divideFunction = (a,b) => { return (a / b).toFixed(3); };
+let operationSymbolEnum = {PLUS: '+', MINUS: '-', MULTIPLY: '\u00d7', DIVIDE: '\u00f7',CALC: '=',COMA : '.',P_M: '\u00b1' , C: 'C', BACKSPACE: '\u232B'}; //P_m +/- unicode symbol
 
 class CalcElement extends HTMLButtonElement{
     constructor(){
@@ -60,7 +60,8 @@ class Functionality extends AbstractInjectedFuncionality{
                 this.output.backspace();
                 break;
             case operationSymbolEnum.C:
-                this.output.clearOutput();
+                this.output.clearOutput()
+                this.calc.setOperation(null);
                 break;
         }
     }
@@ -80,7 +81,7 @@ class Calc{
         this.numberA = this.OutputField.getOutput();
     }
     saveNumberAndClearOutput(){
-        this.numberB = this.numberA;
+        this.numberB = this.OutputField.getOutput();
         this.numberSaved = true;
         this.OutputField.clearOutput();
     }
@@ -88,13 +89,25 @@ class Calc{
         this.operation = operation;
     }
     doSavedOperation(){
-        this.OutputField.clearOutput();
-        this.numberA = this.operation(this.numberB, this.numberA);
-        this.numberSaved = false;
-        this.OutputField.setOutput(this.numberA);
+        if (this.operation != null && this.checkIfNotDividedByZero()){
+            this.numberA = this.OutputField.getOutput();
+            this.OutputField.clearOutput();
+            let result = this.operation(this.numberB, this.numberA);
+            this.numberSaved = false;
+            this.numberB = result;
+            this.OutputField.setOutput(result);
+        }
     }
     isNumberSaved(){
         return this.numberSaved;
+    }
+    checkIfNotDividedByZero(){
+        if (this.operation == divideFunction && this.OutputField.getOutput() == 0){
+            alert("You shall not divide by zero....");
+            this.setOperation(null);
+            return false;
+        }
+        return true;
     }
 }
 class NumButton extends CalcElement{
@@ -137,7 +150,7 @@ class OutputField extends HTMLInputElement{
         super.value = null;
     }
     addComa(){
-        super.value += ',';
+        super.value += '.';
     }
     changeSign(){
         super.value *= -1;
