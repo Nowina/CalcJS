@@ -2,13 +2,12 @@ let sumFunction = (a,b) => { return a + b; };
 let substractFunction = (a,b) => { return a - b; };
 let multipleFunction = (a,b) => { return a * b; };
 let divideFunction = (a,b) => { return a / b; };
-let operationSymbolEnum = {PLUS: '+', MINUS: '-', MULTIPLY: '\u00d7', DIVIDE: '\u00f7',CALC: '=',COMA : ',',P_M: '\u00b1' , C: 'c', BACKSPACE: '\u232B'}; //P_m +/- unicode symbol
+let operationSymbolEnum = {PLUS: '+', MINUS: '-', MULTIPLY: '\u00d7', DIVIDE: '\u00f7',CALC: '=',COMA : ',',P_M: '\u00b1' , C: 'C', BACKSPACE: '\u232B'}; //P_m +/- unicode symbol
 
 class CalcElement extends HTMLButtonElement{
-    constructor(label){
+    constructor(){
         super();
         super.classList.add(`btn`);
-        this.innerText = label;
     }
 } 
 class AbstractInjectedFuncionality{
@@ -37,6 +36,7 @@ class TwoArgumentsOperation extends AbstractInjectedFuncionality{
 }
 class Functionality extends AbstractInjectedFuncionality{
     constructor(operationSymbolEnum,Calc, OutputField){
+        super();
         super.function = operationSymbolEnum;
         super.calc = Calc;
         this.output = OutputField;
@@ -57,10 +57,13 @@ class Functionality extends AbstractInjectedFuncionality{
             case operationSymbolEnum.BACKSPACE:
                 this.output.backspace();
                 break;
-            case operationSymbolEnum.C:
+            case 'C':
                 this.output.clearOutput();
                 break;
         }
+    }
+    getEnum(){
+        return super.function;
     }
 }
 class Calc{
@@ -105,10 +108,10 @@ class NumButton extends CalcElement{
 }
 
 class OperatorButton extends CalcElement{
-    constructor(operationSymbolEnum,Functionality){
+    constructor(Functionality){
         super();
-        super.innerText = operationSymbolEnum;
         this.function = Functionality;
+        super.innerText = Functionality.getEnum();
         super.classList.add(`btn`);
         super.classList.add(`btn-secondary`);
         super.addEventListener("click",() => {
@@ -173,11 +176,14 @@ function createGrid(){
         rows[i].appendChild(columnsRowI);
     }
 }
-function addFirstOperatorRow(Calc){
+function addFirstOperatorRow(Calc,OutputField){
     operators = document.querySelectorAll(`.col-sm-4`);
-    operators[0].appendChild(new OperatorButton(operationSymbolEnum.C,Calc));
-    operators[1].appendChild(new OperatorButton(operationSymbolEnum.BACKSPACE, Calc));
-    operators[2].appendChild(new OperatorButton(operationSymbolEnum.PLUS,Calc,sumFunction));
+    let CFunctionality = new Functionality(operationSymbolEnum.C,Calc,OutputField);
+    let BackspaceFunctionality = new Functionality(operationSymbolEnum.BACKSPACE,Calc, OutputField);
+    console.log(CFunctionality);
+    operators[0].appendChild(new OperatorButton(CFunctionality));
+    operators[1].appendChild(new OperatorButton(BackspaceFunctionality));
+    // operators[2].appendChild(new OperatorButton(new Functionality(operationSymbolEnum.PLUS,Calc,OutputField)));
 }
 function addButtonsToGrid(Calc,OutputField){
     nums = document.querySelectorAll(`.col-sm-3`);
@@ -214,7 +220,7 @@ function addButtonsToGrid(Calc,OutputField){
 function fillGrid(Calc,OutputField){
     doc = document.querySelector(`.col-sm-12`);
     doc.appendChild(OutputField);
-    addFirstOperatorRow(Calc);
+    addFirstOperatorRow(Calc,OutputField);
     addButtonsToGrid(Calc,OutputField);
 }
 function Init(){
