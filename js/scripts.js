@@ -49,7 +49,7 @@ class Functionality extends AbstractInjectedFuncionality{
                 this.output.addComa();
                 break;
             case operationSymbolEnum.CALC:
-                if (this.calc.isNumberSaved){
+                if (this.calc.isNumberSaved()){
                     this.calc.doSavedOperation();
                 }
                 break;
@@ -77,7 +77,7 @@ class Calc{
         this.numberSaved = false;
     }
     loadActualNumber(){
-        this.numberA = Number(this.OutputField.getOutput());
+        this.numberA = this.OutputField.getOutput();
     }
     saveNumberAndClearOutput(){
         this.numberB = this.numberA;
@@ -131,7 +131,7 @@ class OutputField extends HTMLInputElement{
         super.value += String(number);
     }
     getOutput(){
-        return super.value;
+        return Number(super.value);
     }
     clearOutput(){
         super.value = null;
