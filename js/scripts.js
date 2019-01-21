@@ -127,7 +127,6 @@ class OperatorButton extends CalcElement{
         super();
         this.function = Functionality;
         super.innerText = this.function.getEnum();
-        super.classList.add(`btn`);
         super.classList.add(`btn-secondary`);
         super.addEventListener("click",() => {
             this.function.invoke();
@@ -240,8 +239,10 @@ function Init(){
     customElements.define('num-button',NumButton,{extends:'button'});
     customElements.define('operator-button', OperatorButton,{extends:'button'});
     customElements.define('output-field',OutputField, {extends:'input'});
+
     let output = new OutputField();
     let calc = new Calc(output);
+    
     createGrid();
     fillGrid(calc,output);
 }
